@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
+import _ from 'lodash';
 import SearchBar from './components/search_bar';
 import VideoList from './components/video_list';
 import YTSearch from 'youtube-api-search';
@@ -7,7 +8,6 @@ import VideoDetail from './components/video_detail';
 
 const API_key = 'AIzaSyA8ZPf-cjk8Z_8nADo0xuDa1JTPWseIvgg';
 
-// Create a component which produce some HTML
 class App extends Component {
     constructor(props) {
         super(props);
@@ -17,15 +17,17 @@ class App extends Component {
 
 
     }
-    handleInputSearchTerm(term){
+    handleInputSearchTerm(term) {
         YTSearch({key: API_key, term : term}, (videos) => {
             this.setState({videos: videos, selectedVideo: videos[0]});
         })
     }
     render() {
+        const videoSearch = _.debounce((term)=> this.handleInputSearchTerm(term), 500);
+
         return (
             <div>
-                <SearchBar onInputSearchTerm = {(term) => {this.handleInputSearchTerm(term)}}/>
+                <SearchBar onInputSearchTerm = {videoSearch}/>
                 <VideoDetail video={this.state.selectedVideo} />
                 <VideoList videos={this.state.videos} onVideoSelection = {(video)=>this.setSelectedVideo(video)} />
             </div> 
@@ -33,10 +35,9 @@ class App extends Component {
     }
 
     setSelectedVideo(video) {
-        this.setState({selectedVideo : video})
+        this.setState({selectedVideo : video});
     }
 
 }
-// Insert the generated HTMl and put it inside DOM.
 
 ReactDOM.render(<App />, document.querySelector('.container'));
